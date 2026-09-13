@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stupid Little Road Trip Games</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#171B24;
+  --surface:#1F2430;
+  --surface-2:#2A3040;
+  --surface-3:#333B4E;
+  --text:#F4EFE4;
+  --text-dim:#A8AFC0;
+  --yellow:#FFC93C;
+  --yellow-ink:#3A2C05;
+  --red:#FF5A5F;
+  --green:#3ECF8E;
+  --line: rgba(244,239,228,0.12);
+  --radius: 14px;
+  --radius-lg: 22px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk', sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(255,201,60,0.07), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(62,207,142,0.06), transparent 45%);
+  pointer-events:none;
+  z-index:0;
+}
+h1,h2,h3{ font-family:'Anton', sans-serif; font-weight:400; letter-spacing:0.01em; margin:0; }
+p{ margin:0; }
+button{ font-family:inherit; }
+a{ color:inherit; }
+::selection{ background:var(--yellow); color:var(--yellow-ink); }
+
+.wrap{ max-width:920px; margin:0 auto; padding:0 18px; position:relative; z-index:1; }
+
+/* ---------- Header / Hero ---------- */
+.hero{ padding:36px 0 22px; }
+.hero .stripe{
+  display:flex; gap:6px; margin-bottom:18px;
+}
+.hero .stripe span{
+  width:26px; height:6px; border-radius:3px; background:var(--yellow); opacity:0.9;
+}
+.hero .stripe span:nth-child(2){ background:var(--red); }
+.hero .stripe span:nth-child(3){ background:var(--green); }
+.hero h1{
+  font-size:clamp(2.4rem, 8vw, 3.6rem);
+  line-height:0.95;
+  text-transform:uppercase;
+}
+.hero h1 .accent{ color:var(--yellow); }
+.hero .tagline{
+  margin-top:14px; color:var(--text-dim); font-size:1.02rem; max-width:46ch; line-height:1.5;
+}
+
+/* ---------- Driving car animation ---------- */
+.hero-road{
+  position:relative; height:56px; margin-top:22px; overflow:hidden;
+}
+.hero-road .road-line{
+  position:absolute; left:0; right:0; bottom:14px; height:4px; border-radius:2px;
+  background-image: repeating-linear-gradient(90deg, var(--line) 0 18px, transparent 18px 36px);
+}
+.car-track{
+  position:absolute; bottom:6px; left:-18%; width:70px;
+  animation: driveAcross 8s linear infinite;
+}
+.car-bounce{ animation: carBounce 0.5s ease-in-out infinite; }
+.car-bounce svg{ display:block; width:100%; height:auto; }
+.wheel{ transform-origin:center; animation: wheelSpin 0.5s linear infinite; }
+@keyframes driveAcross{
+  0%{ left:-18%; }
+  100%{ left:112%; }
+}
+@keyframes carBounce{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-2px); }
+}
+@keyframes wheelSpin{
+  from{ transform:rotate(0deg); }
+  to{ transform:rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .car-track{ animation:none; left:10%; }
+  .car-bounce, .wheel{ animation:none; }
+}
+
+/* ---------- Filter chips ---------- */
+.filters{
+  display:flex; gap:8px; overflow-x:auto; padding:4px 0 22px;
+  scrollbar-width:none;
+}
+.filters::-webkit-scrollbar{ display:none; }
+.chip{
+  flex:none;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--text-dim);
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:0.88rem;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .15s, color .15s, border-color .15s;
+}
+.chip.active{
+  background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow);
+}
+
+/* ---------- Game cards ---------- */
+.grid{
+  display:grid; grid-template-columns:1fr; gap:14px; padding-bottom:50px;
+}
+@media(min-width:640px){
+  .grid{ grid-template-columns:1fr 1fr; }
+}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  cursor:pointer;
+  position:relative;
+  transition:transform .15s, border-color .15s, background .15s;
+  text-align:left;
+  display:flex; flex-direction:column; gap:10px;
+}
+.card:hover, .card:active{ border-color:var(--yellow); background:var(--surface-2); }
+.card .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.card h3{ font-size:1.3rem; text-transform:uppercase; line-height:1.05; }
+.card .desc{ color:var(--text-dim); font-size:0.92rem; line-height:1.4; }
+.plate{
+  flex:none;
+  border:2px solid currentColor;
+  border-radius:6px;
+  padding:3px 8px;
+  font-family:'Anton', sans-serif;
+  font-size:0.72rem;
+  letter-spacing:0.03em;
+}
+.plate.solo{ color:var(--green); }
+.plate.two{ color:var(--yellow); }
+.plate.family{ color:var(--red); }
+.plate.group{ color:#8FB8FF; }
+
+/* ---------- Game screens ---------- */
+.screen{ display:none; padding:26px 0 60px; min-height:100vh; position:relative; z-index:1; }
+.screen.active{ display:block; }
+.game-top{
+  display:flex; align-items:center; gap:12px; margin-bottom:20px;
+}
+.back-btn{
+  background:var(--surface); border:1px solid var(--line); color:var(--text);
+  border-radius:999px; padding:9px 16px; font-size:0.88rem; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; gap:6px;
+}
+.game-top h2{ font-size:1.5rem; text-transform:uppercase; }
+.howto{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 16px; margin-bottom:22px; color:var(--text-dim); font-size:0.92rem; line-height:1.5;
+}
+.howto strong{ color:var(--text); }
+
+.panel{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:22px; margin-bottom:16px;
+}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:none; border-radius:999px; padding:14px 22px; font-size:1rem; font-weight:700;
+  cursor:pointer; background:var(--surface-2); color:var(--text); border:1px solid var(--line);
+  transition:transform .1s, background .15s;
+}
+.btn:active{ transform:scale(0.97); }
+.btn-primary{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
+.btn-red{ background:var(--red); color:#3A0C0C; border-color:var(--red); }
+.btn-green{ background:var(--green); color:#063321; border-color:var(--green); }
+.btn-block{ width:100%; }
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+.badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.badge{
+  font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
+  padding:5px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-dim);
+}
+
+/* ---------- Bracket game ---------- */
+.round-label{ text-align:center; color:var(--yellow); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem; margin-bottom:6px;}
+.matchup{ display:flex; flex-direction:column; gap:12px; align-items:stretch; max-width:520px; margin:0 auto; }
+.song-btn{
+  background:var(--surface-2); border:2px solid var(--line); border-radius:var(--radius);
+  padding:22px 20px; text-align:left; cursor:pointer; color:var(--text);
+  transition:border-color .15s, background .15s, transform .1s;
+}
+.song-btn:hover{ border-color:var(--yellow); }
+.song-btn:active{ transform:scale(0.98); }
+.song-btn .t{ font-family:'Anton', sans-serif; font-size:1.2rem; text-transform:uppercase; line-height:1.1; }
+.song-btn .a{ color:var(--text-dim); font-size:0.9rem; margin-top:4px; }
+.vs{ text-align:center; color:var(--text-dim); font-family:'Anton',sans-serif; letter-spacing:0.1em; }
+.bracket-progress{ height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-bottom:22px; }
+.bracket-progress i{ display:block; height:100%; background:var(--yellow); width:0%; transition:width .3s; }
+.champion-card{ text-align:center; padding:40px 20px; }
+.champion-card .trophy{ font-size:3rem; margin-bottom:10px; }
+.champion-card .t{ font-family:'Anton',sans-serif; font-size:2rem; text-transform:uppercase; color:var(--yellow); }
+.champion-card .a{ color:var(--text-dim); margin-top:6px; }
+
+/* ---------- WYR ---------- */
+.wyr-card{ text-align:center; padding:10px 0 20px; }
+.wyr-count{ color:var(--text-dim); font-size:0.85rem; margin-bottom:14px; }
+.wyr-options{ display:flex; flex-direction:column; gap:14px; }
+.wyr-opt{
+  background:var(--surface-2); border:2px solid var(--line); border-radius:var(--radius);
+  padding:26px 18px; font-size:1.15rem; font-weight:600; cursor:pointer; line-height:1.35;
+}
+.wyr-opt:active{ transform:scale(0.98); }
+.wyr-opt.a{ border-color:rgba(255,201,60,0.4); }
+.wyr-opt.b{ border-color:rgba(255,90,95,0.4); }
+.wyr-or{ font-family:'Anton',sans-serif; color:var(--text-dim); letter-spacing:0.1em; }
+.tally{ display:flex; justify-content:center; gap:26px; margin-top:18px; color:var(--text-dim); font-size:0.85rem; }
+
+/* ---------- 20 Questions ---------- */
+.secret-box{
+  background:var(--surface-2); border:2px dashed var(--line); border-radius:var(--radius);
+  padding:40px 20px; text-align:center; margin-bottom:18px; cursor:pointer; font-family:'Anton',sans-serif;
+  font-size:1.6rem; text-transform:uppercase; color:var(--text-dim);
+}
+.secret-box.revealed{ color:var(--yellow); border-style:solid; border-color:var(--yellow); }
+.counter-display{ text-align:center; margin:18px 0; }
+.counter-display .num{ font-family:'Anton',sans-serif; font-size:3rem; color:var(--yellow); }
+.counter-display .lbl{ color:var(--text-dim); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; }
+.cat-pick{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:18px;}
+@media(min-width:480px){ .cat-pick{ grid-template-columns:repeat(3,1fr);} }
+.cat-btn{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 8px; text-align:center; font-weight:700; cursor:pointer; color:var(--text);
+}
+.cat-btn.active{ border-color:var(--yellow); color:var(--yellow); }
+
+/* ---------- License Plate Bingo / I Spy ---------- */
+.spot-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(min-width:520px){ .spot-grid{ grid-template-columns:repeat(3,1fr);} }
+.spot-tile{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 10px; text-align:center; font-weight:600; font-size:0.92rem; cursor:pointer;
+  transition:background .15s, border-color .15s;
+}
+.spot-tile.found{
+  background:rgba(62,207,142,0.15); border-color:var(--green); color:var(--green);
+  text-decoration:line-through; text-decoration-color:rgba(62,207,142,0.5);
+}
+.spot-tile.bonus{ border-style:dashed; }
+.progress-line{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; color:var(--text-dim); font-size:0.9rem; }
+
+/* ---------- Category Sprint ---------- */
+.letter-big{ text-align:center; font-family:'Anton',sans-serif; font-size:5rem; color:var(--yellow); line-height:1; margin:6px 0 18px; }
+.timer-big{ text-align:center; font-family:'Anton',sans-serif; font-size:3.4rem; margin-bottom:6px; }
+.timer-big.low{ color:var(--red); }
+.cat-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.cat-list .item{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:12px 16px; font-weight:600;
+}
+
+/* ---------- Two truths / turn tracker ---------- */
+.turn-card{ text-align:center; padding:8px 0 6px; }
+.turn-card .who{ color:var(--text-dim); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px; }
+.turn-card .prompt{ font-size:1.3rem; font-weight:600; line-height:1.4; }
+.player-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.player-tag{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:999px;
+  padding:7px 14px; font-size:0.85rem; display:flex; align-items:center; gap:8px;
+}
+.player-tag button{ background:none; border:none; color:var(--red); cursor:pointer; font-weight:700; }
+.add-player-row{ display:flex; gap:8px; margin-bottom:16px; }
+.add-player-row input{
+  flex:1; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:12px 14px; color:var(--text); font-family:inherit; font-size:0.95rem;
+}
+.add-player-row input::placeholder{ color:var(--text-dim); }
+
+/* ---------- Story chain ---------- */
+.story-log{ display:flex; flex-direction:column; gap:10px; margin-bottom:18px; max-height:340px; overflow-y:auto; padding-right:4px; }
+.story-line{ background:var(--surface-2); border-radius:var(--radius); padding:12px 14px; }
+.story-line .p{ color:var(--yellow); font-size:0.78rem; font-weight:700; text-transform:uppercase; margin-bottom:4px; }
+textarea.story-input{
+  width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  color:var(--text); padding:14px; font-family:inherit; font-size:1rem; resize:vertical; min-height:80px; margin-bottom:12px;
+}
+
+/* ---------- Trivia duel ---------- */
+.score-row{ display:flex; justify-content:space-between; margin-bottom:18px; }
+.score-box{ text-align:center; flex:1; }
+.score-box .name{ color:var(--text-dim); font-size:0.85rem; text-transform:uppercase; }
+.score-box .pts{ font-family:'Anton',sans-serif; font-size:2.4rem; }
+.score-box.active .pts{ color:var(--yellow); }
+.trivia-q{ font-size:1.2rem; font-weight:600; margin-bottom:18px; line-height:1.4; }
+.opt-list{ display:flex; flex-direction:column; gap:10px; }
+.opt-btn{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 16px; text-align:left; cursor:pointer; font-weight:600; color:var(--text);
+}
+.opt-btn.correct{ border-color:var(--green); background:rgba(62,207,142,0.15); color:var(--green); }
+.opt-btn.wrong{ border-color:var(--red); background:rgba(255,90,95,0.15); color:var(--red); }
+.opt-btn[disabled]{ cursor:default; }
+
+.center-text{ text-align:center; }
+.muted{ color:var(--text-dim); }
+.mt{ margin-top:16px; }
+.mb{ margin-bottom:16px; }
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="home-view">
+  <div class="hero">
+    <div class="stripe"><span></span><span></span><span></span></div>
+    <h1>Stupid Little<br><span class="accent">Road Trip</span> Games</h1>
+    <p class="tagline">Ten dumb little games to keep everyone in the car from losing their minds. No app store, no sign up, no service station wifi required.</p>
+    <div class="hero-road">
+      <div class="road-line"></div>
+      <div class="car-track">
+        <div class="car-bounce">
+          <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="52" width="184" height="6" rx="3" fill="var(--red)" opacity="0.9"/>
+            <path d="M20 52 L45 18 Q50 12 58 12 H142 Q150 12 155 18 L180 52 Z" fill="var(--yellow)"/>
+            <rect x="66" y="20" width="30" height="24" rx="4" fill="var(--bg)"/>
+            <rect x="104" y="20" width="30" height="24" rx="4" fill="var(--bg)"/>
+            <rect x="4" y="46" width="192" height="14" rx="7" fill="var(--yellow)"/>
+            <circle cx="55" cy="72" r="17" fill="#14161C"/>
+            <circle cx="145" cy="72" r="17" fill="#14161C"/>
+            <g class="wheel" style="transform-box:fill-box; transform-origin:55px 72px;">
+              <circle cx="55" cy="72" r="6" fill="#8B93A6"/>
+              <rect x="53" y="60" width="4" height="24" fill="#8B93A6"/>
+              <rect x="43" y="70" width="24" height="4" fill="#8B93A6"/>
+            </g>
+            <g class="wheel" style="transform-box:fill-box; transform-origin:145px 72px;">
+              <circle cx="145" cy="72" r="6" fill="#8B93A6"/>
+              <rect x="143" y="60" width="4" height="24" fill="#8B93A6"/>
+              <rect x="133" y="70" width="24" height="4" fill="#8B93A6"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="chip active" data-filter="all">All Games</button>
+    <button class="chip" data-filter="solo">Solo</button>
+    <button class="chip" data-filter="two">2 Player</button>
+    <button class="chip" data-filter="family">Family</button>
+    <button class="chip" data-filter="group">Group</button>
+  </div>
+
+  <div class="grid" id="game-grid"></div>
+</div>
+
+<div id="game-views">
+
+  <!-- 1. SONG BRACKET -->
+  <section class="screen" id="screen-bracket">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Song Bracket Battle</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> 64 songs enter, 1 leaves. Tap your favorite of each pair to send it to the next round. Play solo or hold the phone up and let the car vote out loud.</div>
+
+      <div id="bracket-setup" class="panel center-text">
+        <p class="mb">Ready to crown a champion out of 64 songs?</p>
+        <button class="btn btn-primary btn-block" onclick="startBracket()">Start the Bracket</button>
+      </div>
+
+      <div id="bracket-play" class="hidden">
+        <div class="bracket-progress"><i id="bracket-bar"></i></div>
+        <div class="round-label" id="bracket-round"></div>
+        <div class="matchup">
+          <button class="song-btn" id="song-left" onclick="pickSong(0)"></button>
+          <div class="vs">VS</div>
+          <button class="song-btn" id="song-right" onclick="pickSong(1)"></button>
+        </div>
+        <div class="btn-row mt" style="justify-content:center;">
+          <button class="btn" onclick="startBracket()">Reshuffle &amp; Restart</button>
+        </div>
+      </div>
+
+      <div id="bracket-champion" class="hidden">
+        <div class="panel champion-card">
+          <div class="trophy">🏆</div>
+          <p class="muted">Your road trip champion is</p>
+          <p class="t" id="champ-title"></p>
+          <p class="a" id="champ-artist"></p>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="startBracket()">Play Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. WOULD YOU RATHER -->
+  <section class="screen" id="screen-wyr">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Would You Rather: Road Edition</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Read the two options out loud. Everyone picks a side and has to defend it. Tap the one you'd pick to keep score, then hit next.</div>
+      <div class="panel wyr-card">
+        <p class="wyr-count" id="wyr-count"></p>
+        <div class="wyr-options">
+          <button class="wyr-opt a" id="wyr-a" onclick="pickWyr('a')"></button>
+          <div class="wyr-or">OR</div>
+          <button class="wyr-opt b" id="wyr-b" onclick="pickWyr('b')"></button>
+        </div>
+        <div class="tally">
+          <span id="wyr-tally-a">A: 0</span>
+          <span id="wyr-tally-b">B: 0</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="nextWyr()">Next Question</button>
+    </div>
+  </section>
+
+  <!-- 3. 20 QUESTIONS -->
+  <section class="screen" id="screen-20q">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>20 Questions</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Pick a category, then tap the box to reveal a secret word to the answerer only &mdash; don't let anyone else peek. Everyone else asks yes-or-no questions. Tap the counter each time a question gets used. Guess it before you hit 20.</div>
+
+      <div class="panel">
+        <p class="mb" style="font-weight:700;">Pick a category</p>
+        <div class="cat-pick" id="q20-cats"></div>
+      </div>
+
+      <div class="panel" id="q20-play">
+        <div class="secret-box" id="q20-secret" onclick="revealSecret()">Tap to reveal to the answerer</div>
+        <div class="counter-display">
+          <div class="num" id="q20-count">0</div>
+          <div class="lbl">Questions Asked (of 20)</div>
+        </div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-primary" onclick="askQuestion()">+1 Question Asked</button>
+          <button class="btn" onclick="undoQuestion()">Undo</button>
+        </div>
+        <div class="btn-row mt" style="justify-content:center;">
+          <button class="btn btn-green" onclick="newSecret()">New Word</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. LICENSE PLATE BINGO -->
+  <section class="screen" id="screen-plates">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>License Plate Bingo</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Spot a state's plate out the window, tap it off the list. See how many of the 50 (plus a few bonus spots) you can find before you get where you're going.</div>
+      <div class="progress-line">
+        <span id="plate-progress">0 / 55 spotted</span>
+        <button class="btn" onclick="resetPlates()">Reset</button>
+      </div>
+      <div class="spot-grid" id="plate-grid"></div>
+    </div>
+  </section>
+
+  <!-- 5. CATEGORY SPRINT -->
+  <section class="screen" id="screen-sprint">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Category Sprint</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Hit start for a random letter and 5 categories. You've got 60 seconds to think of a word starting with that letter for each one &mdash; out loud or on paper. Play solo against the clock or race the whole car.</div>
+
+      <div id="sprint-setup" class="panel center-text">
+        <button class="btn btn-primary btn-block" onclick="startSprint()">Start Sprint</button>
+      </div>
+
+      <div id="sprint-play" class="panel hidden">
+        <div class="letter-big" id="sprint-letter">A</div>
+        <div class="timer-big" id="sprint-timer">60</div>
+        <div class="cat-list" id="sprint-cats"></div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" id="sprint-pause-btn" onclick="pauseSprint()">Pause</button>
+          <button class="btn btn-red" onclick="startSprint()">New Round</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. TWO TRUTHS AND A LIE -->
+  <section class="screen" id="screen-truths">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Two Truths and a Lie</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Add everyone playing. On your turn, use the topic shown to come up with two true statements and one lie about yourself. Everyone else guesses the lie.</div>
+
+      <div class="panel">
+        <p class="mb" style="font-weight:700;">Players</p>
+        <div class="player-tags" id="truths-players"></div>
+        <div class="add-player-row">
+          <input type="text" id="truths-name" placeholder="Add a player name" onkeydown="if(event.key==='Enter')addTruthsPlayer()">
+          <button class="btn btn-primary" onclick="addTruthsPlayer()">Add</button>
+        </div>
+      </div>
+
+      <div class="panel turn-card">
+        <div class="who" id="truths-turn">Add players to begin</div>
+        <div class="prompt" id="truths-topic">&mdash;</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="nextTruthsTurn()">Next Player's Turn</button>
+    </div>
+  </section>
+
+  <!-- 7. STORY CHAIN -->
+  <section class="screen" id="screen-story">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Story Chain</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Take turns adding one line to the story. Read the whole thing out loud so far, then add your part. No editing what came before, no matter how weird it gets.</div>
+
+      <div class="panel">
+        <div class="story-log" id="story-log"></div>
+        <textarea class="story-input" id="story-input" placeholder="Add the next line of the story..."></textarea>
+        <button class="btn btn-primary btn-block" onclick="addStoryLine()">Add Line &amp; Pass It On</button>
+      </div>
+      <button class="btn btn-block" onclick="resetStory()">Start a New Story</button>
+    </div>
+  </section>
+
+  <!-- 8. HIGHWAY TRIVIA DUEL -->
+  <section class="screen" id="screen-trivia">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Highway Trivia Duel</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Two players go head to head. Whoever's turn it is answers &mdash; get it right and score a point, then it's the other player's turn. First to the end of the deck with more points wins.</div>
+
+      <div id="trivia-setup" class="panel center-text">
+        <button class="btn btn-primary btn-block" onclick="startTrivia()">Start Duel</button>
+      </div>
+
+      <div id="trivia-play" class="hidden">
+        <div class="score-row">
+          <div class="score-box" id="trivia-score-1"><div class="name">Player 1</div><div class="pts">0</div></div>
+          <div class="score-box" id="trivia-score-2"><div class="name">Player 2</div><div class="pts">0</div></div>
+        </div>
+        <div class="panel">
+          <p class="badge mb" id="trivia-turn-badge">PLAYER 1's TURN</p>
+          <div class="trivia-q" id="trivia-q"></div>
+          <div class="opt-list" id="trivia-opts"></div>
+        </div>
+        <button class="btn btn-primary btn-block hidden" id="trivia-next-btn" onclick="nextTrivia()">Next Question</button>
+      </div>
+
+      <div id="trivia-done" class="hidden panel champion-card">
+        <div class="trophy">🏁</div>
+        <p class="t" id="trivia-winner"></p>
+        <button class="btn btn-primary btn-block mt" onclick="startTrivia()">Play Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. I SPY CHECKLIST -->
+  <section class="screen" id="screen-ispy">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>I Spy Checklist</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Keep an eye out the window. First person to spot something on the list calls it out and taps it off. See how many the whole car can find together.</div>
+      <div class="progress-line">
+        <span id="ispy-progress">0 / 24 spotted</span>
+        <button class="btn" onclick="resetIspy()">Reset</button>
+      </div>
+      <div class="spot-grid" id="ispy-grid"></div>
+    </div>
+  </section>
+
+  <!-- 10. NEVER HAVE I EVER -->
+  <section class="screen" id="screen-never">
+    <div class="wrap">
+      <div class="game-top">
+        <button class="back-btn" onclick="goHome()">&larr; Games</button>
+        <h2>Never Have I Ever: Road Trip</h2>
+      </div>
+      <div class="howto"><strong>How to play:</strong> Everyone holds up 5 fingers. Read the statement out loud &mdash; if you HAVE done it, put a finger down. Last person with fingers still up wins the round.</div>
+      <div class="panel turn-card">
+        <div class="who" id="never-count"></div>
+        <div class="prompt" id="never-statement">&mdash;</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="nextNever()">Next Statement</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============ SHARED NAV ============ */
+function goHome(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('home-view').style.display = 'block';
+  window.scrollTo(0,0);
+}
+function openGame(id){
+  document.getElementById('home-view').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* ============ GAME CATALOG / HOME GRID ============ */
+const GAMES = [
+  {id:'bracket', name:'Song Bracket Battle', desc:'64 songs, one champion. Pick your favorite of each pair.', tags:['solo','group'], plate:'1+ PLAYER'},
+  {id:'wyr', name:'Would You Rather', desc:'Road-trip dilemmas. Pick a side and argue about it.', tags:['two','family','group'], plate:'2+ PLAYERS'},
+  {id:'20q', name:'20 Questions', desc:'One secret word, twenty yes-or-no questions to find it.', tags:['two','family','group'], plate:'2+ PLAYERS'},
+  {id:'plates', name:'License Plate Bingo', desc:'Spot all 50 states before you reach your exit.', tags:['family','solo'], plate:'ANY'},
+  {id:'sprint', name:'Category Sprint', desc:'A letter, five categories, sixty seconds on the clock.', tags:['solo','group'], plate:'1+ PLAYER'},
+  {id:'truths', name:'Two Truths and a Lie', desc:'A topic to riff on, and everyone else has to spot the lie.', tags:['family','group'], plate:'3+ PLAYERS'},
+  {id:'story', name:'Story Chain', desc:'Everyone adds one line. Nobody knows where it\u2019s going.', tags:['group','family'], plate:'2+ PLAYERS'},
+  {id:'trivia', name:'Highway Trivia Duel', desc:'Head-to-head trivia. Loser picks the next gas station snack.', tags:['two'], plate:'2 PLAYERS'},
+  {id:'ispy', name:'I Spy Checklist', desc:'A roadside scavenger hunt for the whole back seat.', tags:['family'], plate:'FAMILY'},
+  {id:'never', name:'Never Have I Ever', desc:'Road trip confessions. Fingers down if you\u2019ve done it.', tags:['family','group'], plate:'3+ PLAYERS'},
+];
+const TAG_LABEL = {solo:'SOLO', two:'2P', family:'FAM', group:'GRP'};
+function primaryTagClass(tags){
+  if(tags.includes('two')) return 'two';
+  if(tags.includes('family')) return 'family';
+  if(tags.includes('group')) return 'group';
+  return 'solo';
+}
+function renderGrid(filter){
+  const grid = document.getElementById('game-grid');
+  grid.innerHTML = '';
+  GAMES.filter(g=> filter==='all' || g.tags.includes(filter)).forEach(g=>{
+    const card = document.createElement('button');
+    card.className='card';
+    card.onclick=()=>openGame(g.id);
+    card.innerHTML = `
+      <div class="top-row">
+        <h3>${g.name}</h3>
+        <span class="plate ${primaryTagClass(g.tags)}">${g.plate}</span>
+      </div>
+      <p class="desc">${g.desc}</p>`;
+    grid.appendChild(card);
+  });
+}
+document.getElementById('filters').addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(btn.dataset.filter);
+});
+renderGrid('all');
+
+/* ============ 1. SONG BRACKET ============ */
+const SONGS = [
+  {t:"Bohemian Rhapsody",a:"Queen"},{t:"Don't Stop Believin'",a:"Journey"},
+  {t:"Sweet Child O' Mine",a:"Guns N' Roses"},{t:"Livin' on a Prayer",a:"Bon Jovi"},
+  {t:"Hotel California",a:"Eagles"},{t:"Uptown Funk",a:"Mark Ronson ft. Bruno Mars"},
+  {t:"Shake It Off",a:"Taylor Swift"},{t:"Billie Jean",a:"Michael Jackson"},
+  {t:"Dancing Queen",a:"ABBA"},{t:"I Wanna Dance with Somebody",a:"Whitney Houston"},
+  {t:"Mr. Brightside",a:"The Killers"},{t:"Rolling in the Deep",a:"Adele"},
+  {t:"Wonderwall",a:"Oasis"},{t:"Take On Me",a:"a-ha"},
+  {t:"Sweet Caroline",a:"Neil Diamond"},{t:"Piano Man",a:"Billy Joel"},
+  {t:"I Will Survive",a:"Gloria Gaynor"},{t:"Africa",a:"Toto"},
+  {t:"Thriller",a:"Michael Jackson"},{t:"Smells Like Teen Spirit",a:"Nirvana"},
+  {t:"Blinding Lights",a:"The Weeknd"},{t:"Shape of You",a:"Ed Sheeran"},
+  {t:"Levitating",a:"Dua Lipa"},{t:"Good 4 U",a:"Olivia Rodrigo"},
+  {t:"Old Town Road",a:"Lil Nas X"},{t:"Uptown Girl",a:"Billy Joel"},
+  {t:"Complicated",a:"Avril Lavigne"},
+  {t:"Since U Been Gone",a:"Kelly Clarkson"},{t:"Toxic",a:"Britney Spears"},
+  {t:"Umbrella",a:"Rihanna"},{t:"Hey Ya!",a:"OutKast"},
+  {t:"Mr. Blue Sky",a:"Electric Light Orchestra"},{t:"Life Is a Highway",a:"Tom Cochrane"},
+  {t:"Take Me Home, Country Roads",a:"John Denver"},{t:"Fast Car",a:"Tracy Chapman"},
+  {t:"Born to Run",a:"Bruce Springsteen"},{t:"Free Fallin'",a:"Tom Petty"},
+  {t:"American Pie",a:"Don McLean"},{t:"Under Pressure",a:"Queen & David Bowie"},
+  {t:"Rock You Like a Hurricane",a:"Scorpions"},
+  {t:"Eye of the Tiger",a:"Survivor"},{t:"Don't Stop Me Now",a:"Queen"},
+  {t:"You Shook Me All Night Long",a:"AC/DC"},{t:"Jump",a:"Van Halen"},
+  {t:"Beat It",a:"Michael Jackson"},{t:"Girls Just Want to Have Fun",a:"Cyndi Lauper"},
+  {t:"Vogue",a:"Madonna"},{t:"Like a Prayer",a:"Madonna"},
+  {t:"No Scrubs",a:"TLC"},{t:"Waterfalls",a:"TLC"},
+  {t:"Get Lucky",a:"Daft Punk ft. Pharrell"},{t:"Can't Stop the Feeling!",a:"Justin Timberlake"},
+  {t:"Happy",a:"Pharrell Williams"},{t:"Feel Good Inc.",a:"Gorillaz"},
+  {t:"Mr. Roboto",a:"Styx"},
+  {t:"22",a:"Taylor Swift"},{t:"Party in the U.S.A.",a:"Miley Cyrus"},
+  {t:"Firework",a:"Katy Perry"},{t:"Roar",a:"Katy Perry"},
+  {t:"Africa (Cover)",a:"Weezer"},{t:"Higher Love",a:"Kygo & Whitney Houston"},
+  {t:"Sweet Home Alabama",a:"Lynyrd Skynyrd"},{t:"More Than a Feeling",a:"Boston"},
+  {t:"Africa (Original)",a:"Toto"},{t:"Come On Eileen",a:"Dexys Midnight Runners"},
+  {t:"Sussudio",a:"Phil Collins"},{t:"In the Air Tonight",a:"Phil Collins"},
+  {t:"Africa Reimagined",a:"Angelique Kidjo"},{t:"Renegade",a:"Styx"},
+  {t:"Africa Suite",a:"Earth Wind & Fire"},{t:"September",a:"Earth, Wind & Fire"},
+  {t:"Boogie Wonderland",a:"Earth, Wind & Fire"},{t:"Superstition",a:"Stevie Wonder"},
+  {t:"I Wish",a:"Stevie Wonder"},{t:"Signed, Sealed, Delivered",a:"Stevie Wonder"},
+  {t:"Ain't No Mountain High Enough",a:"Marvin Gaye & Tammi Terrell"},
+  {t:"What's Going On",a:"Marvin Gaye"},{t:"Respect",a:"Aretha Franklin"},
+  {t:"Proud Mary",a:"Creedence Clearwater Revival"},{t:"Bad Moon Rising",a:"Creedence Clearwater Revival"},
+  {t:"Sweet Emotion",a:"Aerosmith"},{t:"Dream On",a:"Aerosmith"},
+  {t:"Livin' la Vida Loca",a:"Ricky Martin"},{t:"Macarena",a:"Los Del Rio"},
+  {t:"I Gotta Feeling",a:"The Black Eyed Peas"},{t:"Shut Up and Dance",a:"Walk the Moon"},
+  {t:"Can't Stop",a:"Red Hot Chili Peppers"},{t:"Californication",a:"Red Hot Chili Peppers"},
+  {t:"Seven Nation Army",a:"The White Stripes"},{t:"Take Me Out",a:"Franz Ferdinand"},
+  {t:"1985",a:"Bowling for Soup"},{t:"All Star",a:"Smash Mouth"},
+  {t:"Semi-Charmed Life",a:"Third Eye Blind"},{t:"How You Remind Me",a:"Nickelback"},
+  {t:"Float On",a:"Modest Mouse"},{t:"Mr. Jones",a:"Counting Crows"},
+  {t:"Good Riddance (Time of Your Life)",a:"Green Day"},{t:"Basket Case",a:"Green Day"},
+  {t:"Torn",a:"Natalie Imbruglia"},{t:"Zombie",a:"The Cranberries"},
+  {t:"Linger",a:"The Cranberries"},{t:"Ironic",a:"Alanis Morissette"},
+  {t:"You Oughta Know",a:"Alanis Morissette"},{t:"Barbie Girl",a:"Aqua"},
+  {t:"Genie in a Bottle",a:"Christina Aguilera"},{t:"...Baby One More Time",a:"Britney Spears"},
+  {t:"Bye Bye Bye",a:"NSYNC"},{t:"I Want It That Way",a:"Backstreet Boys"},
+  {t:"Larger Than Life",a:"Backstreet Boys"},{t:"Wannabe",a:"Spice Girls"},
+  {t:"Say My Name",a:"Destiny's Child"},{t:"Crazy in Love",a:"Beyonc\u00e9 ft. Jay-Z"},
+  {t:"Single Ladies (Put a Ring on It)",a:"Beyonc\u00e9"},{t:"Hey Soul Sister",a:"Train"},
+  {t:"Drops of Jupiter",a:"Train"},{t:"Home",a:"Edward Sharpe & The Magnetic Zeros"},
+  {t:"Ho Hey",a:"The Lumineers"},{t:"Riptide",a:"Vance Joy"},
+  {t:"Ain't No Sunshine",a:"Bill Withers"},{t:"Lean on Me",a:"Bill Withers"},
+  {t:"Walking on Sunshine",a:"Katrina and the Waves"},{t:"I'm a Believer",a:"The Monkees"},
+  {t:"Twist and Shout",a:"The Beatles"},{t:"Here Comes the Sun",a:"The Beatles"},
+  {t:"Hey Jude",a:"The Beatles"},{t:"Good Vibrations",a:"The Beach Boys"},
+  {t:"Fun, Fun, Fun",a:"The Beach Boys"},{t:"Twist Again",a:"Chubby Checker"},
+  {t:"Great Balls of Fire",a:"Jerry Lee Lewis"},{t:"Johnny B. Goode",a:"Chuck Berry"},
+  {t:"Walk This Way",a:"Run-D.M.C. & Aerosmith"},{t:"Fight for Your Right",a:"Beastie Boys"},
+  {t:"Jump Around",a:"House of Pain"},{t:"Baby Got Back",a:"Sir Mix-a-Lot"},
+  {t:"California Love",a:"2Pac ft. Dr. Dre"},{t:"Gold Digger",a:"Kanye West ft. Jamie Foxx"},
+  {t:"Crazy",a:"Gnarls Barkley"},{t:"Hey There Delilah",a:"Plain White T's"},
+  {t:"Viva la Vida",a:"Coldplay"},{t:"Clocks",a:"Coldplay"},
+  {t:"Use Somebody",a:"Kings of Leon"},{t:"Sex on Fire",a:"Kings of Leon"},
+  {t:"Pumped Up Kicks",a:"Foster the People"},{t:"Radioactive",a:"Imagine Dragons"},
+  {t:"Believer",a:"Imagine Dragons"},{t:"Counting Stars",a:"OneRepublic"},
+  {t:"Send My Love",a:"Adele"},{t:"Someone Like You",a:"Adele"},
+  {t:"Uptown Funk (Live Edit)",a:"Bruno Mars"},{t:"Just the Way You Are",a:"Bruno Mars"},
+  {t:"24K Magic",a:"Bruno Mars"},{t:"Watermelon Sugar",a:"Harry Styles"},
+  {t:"As It Was",a:"Harry Styles"},{t:"Anti-Hero",a:"Taylor Swift"},
+  {t:"Cruel Summer",a:"Taylor Swift"},{t:"drivers license",a:"Olivia Rodrigo"},
+  {t:"Flowers",a:"Miley Cyrus"},{t:"Peaches",a:"Justin Bieber"},
+  {t:"Sunflower",a:"Post Malone & Swae Lee"},{t:"Circles",a:"Post Malone"},
+  {t:"Uptown Saturday Night",a:"Jack Harlow"},{t:"Espresso",a:"Sabrina Carpenter"},
+  {t:"Kill Bill",a:"SZA"},{t:"Vampire",a:"Olivia Rodrigo"},
+];
+let bracketRounds = [];
+let bracketRoundIndex = 0;
+let bracketMatchIndex = 0;
+let bracketWinners = [];
+
+function startBracket(){
+  document.getElementById('bracket-setup').classList.add('hidden');
+  document.getElementById('bracket-champion').classList.add('hidden');
+  document.getElementById('bracket-play').classList.remove('hidden');
+  const shuffled = shuffle(SONGS).slice(0,64);
+  bracketRounds = [shuffled];
+  bracketRoundIndex = 0;
+  bracketMatchIndex = 0;
+  bracketWinners = [];
+  showMatch();
+}
+const ROUND_NAMES = {64:'Round of 64',32:'Round of 32',16:'Sweet 16',8:'Elite 8',4:'Final 4',2:'Championship'};
+function showMatch(){
+  const round = bracketRounds[bracketRoundIndex];
+  const total = round.length;
+  document.getElementById('bracket-round').textContent = (ROUND_NAMES[total] || (total+' Left')) + ' \u2014 Match ' + (bracketMatchIndex/2+1) + ' of ' + (total/2);
+  const left = round[bracketMatchIndex];
+  const right = round[bracketMatchIndex+1];
+  document.getElementById('song-left').innerHTML = `<div class="t">${left.t}</div><div class="a">${left.a}</div>`;
+  document.getElementById('song-right').innerHTML = `<div class="t">${right.t}</div><div class="a">${right.a}</div>`;
+  const totalMatches = 63;
+  const doneMatches = 64 - total/2*2 === 0 ? 0 : 0;
+  let matchesDoneSoFar = 0;
+  for(let i=0;i<bracketRoundIndex;i++){ matchesDoneSoFar += bracketRounds[i].length/2; }
+  matchesDoneSoFar += bracketMatchIndex/2;
+  document.getElementById('bracket-bar').style.width = Math.round((matchesDoneSoFar/totalMatches)*100)+'%';
+}
+function pickSong(which){
+  const round = bracketRounds[bracketRoundIndex];
+  const winner = which===0 ? round[bracketMatchIndex] : round[bracketMatchIndex+1];
+  bracketWinners.push(winner);
+  bracketMatchIndex += 2;
+  if(bracketMatchIndex >= round.length){
+    if(bracketWinners.length === 1){
+      finishBracket(bracketWinners[0]);
+      return;
+    }
+    bracketRounds.push(bracketWinners);
+    bracketWinners = [];
+    bracketRoundIndex++;
+    bracketMatchIndex = 0;
+  }
+  showMatch();
+}
+function finishBracket(winner){
+  document.getElementById('bracket-play').classList.add('hidden');
+  document.getElementById('bracket-champion').classList.remove('hidden');
+  document.getElementById('champ-title').textContent = winner.t;
+  document.getElementById('champ-artist').textContent = winner.a;
+}
+
+/* ============ 2. WOULD YOU RATHER ============ */
+const WYR = [
+  ["Be stuck in a car with a screaming baby for 8 hours","Be stuck in a car with someone who only wants to talk about their fantasy football league"],
+  ["Only be able to eat gas station snacks for the whole trip","Only be able to drink gas station coffee for the whole trip"],
+  ["Have unlimited snacks but no music","Have unlimited music but no snacks"],
+  ["Get a flat tire in the middle of nowhere","Get lost with no phone signal for an hour"],
+  ["Drive through a thunderstorm","Drive through thick fog"],
+  ["Sit in the middle seat the whole trip","Be in charge of navigation the whole trip"],
+  ["Stop every hour for a bathroom break","Never stop until you reach your destination"],
+  ["Have a car that only plays one song on repeat","Have a car with no radio at all"],
+  ["Road trip with your family for a week","Road trip alone for a month"],
+  ["Always get the worst hotel room","Always get the worst rest stop food"],
+  ["Be the designated driver every time","Be the designated navigator every time"],
+  ["Have to sing along to every song out loud","Have to stay completely silent for an hour"],
+  ["Take the scenic route that adds 2 hours","Take the highway that's boring but fast"],
+  ["Share every playlist decision with the group","Get full control of the aux cord all trip"],
+  ["Travel with a car full of pets","Travel with a car full of toddlers"],
+  ["Eat the same road trip meal every day","Never know what your next meal will be"],
+  ["Get carsick on every trip","Get motion sickness reading in the car"],
+  ["Drive an RV cross-country","Fly to every destination instead"],
+  ["Have amazing snacks but terrible music","Have amazing music but terrible snacks"],
+  ["Always be stuck in traffic","Always take the longest possible route"],
+  ["Camp outdoors every night of the trip","Stay in sketchy motels every night"],
+  ["Lose your phone charger for the whole trip","Lose your pillow for the whole trip"],
+  ["Have to ask for directions at every stop","Get lost and figure it out yourself"],
+  ["Be in a car with broken AC in summer","Be in a car with broken heat in winter"],
+  ["Visit every roadside attraction you pass","Skip them all to save time"],
+  ["Have a trip playlist picked by a stranger","Have total silence the entire ride"],
+  ["Split gas money evenly no matter who drives more","Pay based on how much you drove"],
+  ["Drive through the night","Drive only during the day, even if it takes longer"],
+  ["Have to pee with no rest stop for 30 more minutes","Stop at the sketchiest gas station on the route"],
+  ["Ride with the windows down and messy hair the whole trip","Ride with perfect hair but the AC broken"],
+  ["Be responsible for picking every meal stop","Be responsible for picking every playlist"],
+  ["Get stuck behind a slow RV for an hour","Take a detour that adds 45 minutes"],
+  ["Have a co-pilot who back-seat drives the whole way","Have a co-pilot who falls asleep the whole way"],
+  ["Road trip in a tiny two-seater","Road trip in a giant noisy van"],
+  ["Only listen to a genre you hate for the whole trip","Listen to the same 10 songs on repeat"],
+  ["Have to stop at every single historical marker","Skip every rest stop no matter what"],
+  ["Get a parking ticket at your destination","Get a flat tire five minutes from your destination"],
+  ["Share one pair of earbuds for the whole trip","Have no music device at all"],
+  ["Drive through a state you've never seen","Drive through a state you already know by heart"],
+  ["Have a car that smells like fast food forever","Have a car that squeaks the whole trip"],
+  ["Be forced to nap in the car and wake up groggy","Stay awake and be exhausted at the destination"],
+  ["Take a road trip with your boss","Take a road trip with your in-laws"],
+  ["Only stop at diners","Only stop at drive-thrus"],
+  ["Have to sing karaoke at a rest stop","Have to dance in the parking lot for a photo"],
+  ["Navigate using only paper maps","Navigate using a GPS that talks in a strange accent"],
+  ["Get stuck in a car wash mid-trip","Get stuck in a drive-thru line for 20 minutes"],
+  ["Have a squeaky seatbelt the whole ride","Have a rattling glovebox the whole ride"],
+  ["Trade seats every hour","Sit in the same seat the whole trip even if it's uncomfortable"],
+];
+let wyrDeck = shuffle(WYR);
+let wyrIndex = 0;
+let wyrScoreA = 0, wyrScoreB = 0;
+function loadWyr(){
+  if(wyrIndex >= wyrDeck.length){ wyrDeck = shuffle(WYR); wyrIndex = 0; }
+  const [a,b] = wyrDeck[wyrIndex];
+  document.getElementById('wyr-a').textContent = a;
+  document.getElementById('wyr-b').textContent = b;
+  document.getElementById('wyr-count').textContent = 'Question ' + (wyrIndex+1) + ' of ' + wyrDeck.length;
+}
+function nextWyr(){ wyrIndex++; loadWyr(); }
+function pickWyr(side){
+  if(side==='a') wyrScoreA++; else wyrScoreB++;
+  document.getElementById('wyr-tally-a').textContent = 'A: '+wyrScoreA;
+  document.getElementById('wyr-tally-b').textContent = 'B: '+wyrScoreB;
+  nextWyr();
+}
+loadWyr();
+
+/* ============ 3. 20 QUESTIONS ============ */
+const Q20 = {
+  Animals: ["Elephant","Penguin","Kangaroo","Octopus","Giraffe","Cheetah","Dolphin","Owl","Flamingo","Raccoon","Sloth","Peacock","Koala","Platypus","Otter","Hedgehog"],
+  Movies: ["Jurassic Park","Titanic","The Lion King","Shrek","Jaws","Frozen","Avatar","Rocky","Finding Nemo","Star Wars","The Matrix","Toy Story","Home Alone","Jumanji","Ghostbusters","Back to the Future"],
+  Food: ["Pizza","Tacos","Sushi","Pancakes","Watermelon","Popcorn","Spaghetti","Ice Cream","Nachos","Burrito","Waffles","Cheeseburger","Pretzel","Donut","Ramen","Grilled Cheese"],
+  "Famous People": ["Taylor Swift","Albert Einstein","LeBron James","Beyonc\u00e9","Abraham Lincoln","Elon Musk","Serena Williams","Dwayne Johnson","Oprah Winfrey","Michael Jordan","Walt Disney","Beethoven","Cleopatra","Bruno Mars","Will Smith","Adele"],
+  Objects: ["Umbrella","Backpack","Flashlight","Steering Wheel","Sunglasses","Guitar","Skateboard","Traffic Cone","Toothbrush","Camera","Bicycle","Suitcase","Compass","Trampoline","Telescope","Frying Pan"],
+  Places: ["The Grand Canyon","Disneyland","The Moon","Paris","A Farm","A Submarine","The Beach","A Space Station","Las Vegas","A Desert Island","The North Pole","A Castle","A Rainforest","New York City","A Lighthouse","A Volcano"],
+};
+let q20Category = 'Animals';
+let q20Secret = '';
+let q20Count = 0;
+function renderQ20Cats(){
+  const wrap = document.getElementById('q20-cats');
+  wrap.innerHTML='';
+  Object.keys(Q20).forEach(cat=>{
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (cat===q20Category?' active':'');
+    b.textContent = cat;
+    b.onclick = ()=>{ q20Category = cat; renderQ20Cats(); newSecret(); };
+    wrap.appendChild(b);
+  });
+}
+function newSecret(){
+  q20Secret = pick(Q20[q20Category]);
+  q20Count = 0;
+  document.getElementById('q20-count').textContent = q20Count;
+  const box = document.getElementById('q20-secret');
+  box.textContent = 'Tap to reveal to the answerer';
+  box.classList.remove('revealed');
+  box.dataset.shown = '0';
+}
+function revealSecret(){
+  const box = document.getElementById('q20-secret');
+  if(box.dataset.shown === '1'){
+    box.textContent = 'Tap to reveal to the answerer';
+    box.classList.remove('revealed');
+    box.dataset.shown = '0';
+  } else {
+    box.textContent = q20Secret;
+    box.classList.add('revealed');
+    box.dataset.shown = '1';
+  }
+}
+function askQuestion(){
+  if(q20Count < 20){ q20Count++; document.getElementById('q20-count').textContent = q20Count; }
+}
+function undoQuestion(){
+  if(q20Count > 0){ q20Count--; document.getElementById('q20-count').textContent = q20Count; }
+}
+renderQ20Cats();
+newSecret();
+
+/* ============ 4. LICENSE PLATE BINGO ============ */
+const STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
+const PLATE_BONUS = ["Canadian Plate","Mexican Plate","Vanity Plate","U.S. Government Plate","Motorcycle Plate","Rental Car Plate","Trailer Plate","National Park Plate"];
+let plateState = {};
+function renderPlates(){
+  const wrap = document.getElementById('plate-grid');
+  wrap.innerHTML='';
+  const all = STATES.map(s=>({name:s,bonus:false})).concat(PLATE_BONUS.map(s=>({name:s,bonus:true})));
+  all.forEach(item=>{
+    const tile = document.createElement('div');
+    tile.className = 'spot-tile' + (item.bonus?' bonus':'') + (plateState[item.name]?' found':'');
+    tile.textContent = item.name;
+    tile.onclick = ()=>{
+      plateState[item.name] = !plateState[item.name];
+      renderPlates();
+    };
+    wrap.appendChild(tile);
+  });
+  const found = Object.values(plateState).filter(Boolean).length;
+  document.getElementById('plate-progress').textContent = found + ' / ' + all.length + ' spotted';
+}
+function resetPlates(){ plateState = {}; renderPlates(); }
+renderPlates();
+
+/* ============ 5. CATEGORY SPRINT ============ */
+const SPRINT_CATEGORIES = ["Animal","Food","Movie","Country","Name","Car Brand","Sport","Color (shade)","Superhero","School Subject","Song Title","Fruit or Vegetable","Job or Career","Board Game","TV Show","Drink","Body of Water","Article of Clothing","Instrument","Dance Move","Video Game","Candy","Holiday","City","Restaurant Chain","Type of Weather","Dog Breed","Cartoon Character","Household Item","Word Ending in -ing"];
+const LETTERS = "ABCDEFGHIJKLMNOPRSTW".split('');
+let sprintTimer = null;
+let sprintSeconds = 60;
+let sprintPaused = false;
+function startSprint(){
+  clearInterval(sprintTimer);
+  document.getElementById('sprint-setup').classList.add('hidden');
+  document.getElementById('sprint-play').classList.remove('hidden');
+  document.getElementById('sprint-letter').textContent = pick(LETTERS);
+  const cats = shuffle(SPRINT_CATEGORIES).slice(0,5);
+  document.getElementById('sprint-cats').innerHTML = cats.map(c=>`<div class="item">${c}</div>`).join('');
+  sprintSeconds = 60;
+  sprintPaused = false;
+  document.getElementById('sprint-pause-btn').textContent = 'Pause';
+  updateSprintDisplay();
+  sprintTimer = setInterval(()=>{
+    if(sprintPaused) return;
+    sprintSeconds--;
+    updateSprintDisplay();
+    if(sprintSeconds<=0){ clearInterval(sprintTimer); }
+  },1000);
+}
+function updateSprintDisplay(){
+  const el = document.getElementById('sprint-timer');
+  el.textContent = sprintSeconds;
+  el.classList.toggle('low', sprintSeconds<=10);
+}
+function pauseSprint(){
+  sprintPaused = !sprintPaused;
+  document.getElementById('sprint-pause-btn').textContent = sprintPaused ? 'Resume' : 'Pause';
+}
+
+/* ============ 6. TWO TRUTHS AND A LIE ============ */
+const TRUTH_TOPICS = [
+  "Something that happened on a family vacation","A weird talent you have","Your first job","A place you've traveled to","Something from your childhood","A food you refuse to eat","A sport or hobby you tried once","Something embarrassing that happened at school","A pet you've had","Something about your morning routine","A record or personal best you've set","A concert or show you've been to","Something you collect (or used to)","A fear you have","A rule your family had growing up","Something you're surprisingly good at","A costume you've worn","A nickname you've had","Something that happened on a road trip","A class you took in school",
+  "Something you learned the hard way","A tradition your family has",
+  "A time you got lost somewhere","Something on your bucket list",
+  "A skill you wish you had","The last thing you binge-watched",
+  "A gift you once gave or received","Something you're bad at cooking",
+  "A game or app you were obsessed with","A place you'd never want to go back to",
+];
+let truthsPlayers = [];
+let truthsTurnIndex = -1;
+function renderTruthsPlayers(){
+  const wrap = document.getElementById('truths-players');
+  wrap.innerHTML = '';
+  truthsPlayers.forEach((name,i)=>{
+    const tag = document.createElement('span');
+    tag.className='player-tag';
+    tag.innerHTML = `${name} <button onclick="removeTruthsPlayer(${i})">&times;</button>`;
+    wrap.appendChild(tag);
+  });
+}
+function addTruthsPlayer(){
+  const input = document.getElementById('truths-name');
+  const name = input.value.trim();
+  if(!name) return;
+  truthsPlayers.push(name);
+  input.value='';
+  renderTruthsPlayers();
+  if(truthsPlayers.length===1){ truthsTurnIndex = 0; updateTruthsTurn(); }
+}
+function removeTruthsPlayer(i){
+  truthsPlayers.splice(i,1);
+  renderTruthsPlayers();
+  if(truthsPlayers.length===0){
+    truthsTurnIndex = -1;
+    document.getElementById('truths-turn').textContent = 'Add players to begin';
+    document.getElementById('truths-topic').textContent = '\u2014';
+  }
+}
+function updateTruthsTurn(){
+  if(truthsPlayers.length===0) return;
+  document.getElementById('truths-turn').textContent = truthsPlayers[truthsTurnIndex] + "'s turn";
+  document.getElementById('truths-topic').textContent = pick(TRUTH_TOPICS);
+}
+function nextTruthsTurn(){
+  if(truthsPlayers.length===0) return;
+  truthsTurnIndex = (truthsTurnIndex+1) % truthsPlayers.length;
+  updateTruthsTurn();
+}
+
+/* ============ 7. STORY CHAIN ============ */
+const STORY_STARTERS = [
+  "The car had been driving for three hours when the GPS suddenly said, \"recalculating... to the moon.\"",
+  "Nobody noticed the gas station attendant wink at us until we were already back on the highway.",
+  "It was supposed to be a quick pit stop, but then the vending machine started talking.",
+  "Somewhere past mile marker 212, the radio started playing a song none of us had ever heard before, in a language none of us spoke.",
+  "The dog in the back seat had been staring at the same spot on the horizon for twenty minutes.",
+  "The rest stop bathroom had a note taped to the mirror that just said, \"turn back now.\"",
+  "Halfway through the drive, the driver pulled over and said, \"I need to tell you all something.\"",
+  "A tumbleweed rolled across the highway, and for some reason everyone in the car went silent.",
+  "The map app rerouted us through a town that, according to the sign, had a population of exactly zero.",
+];
+let storyLines = [];
+function renderStory(){
+  const log = document.getElementById('story-log');
+  if(storyLines.length===0){
+    log.innerHTML = `<div class="story-line"><div class="p">To start</div>${pick(STORY_STARTERS)}</div>`;
+    return;
+  }
+  log.innerHTML = storyLines.map((line,i)=>`<div class="story-line"><div class="p">Line ${i+1}</div>${line}</div>`).join('');
+  log.scrollTop = log.scrollHeight;
+}
+function addStoryLine(){
+  const input = document.getElementById('story-input');
+  const val = input.value.trim();
+  if(!val) return;
+  if(storyLines.length===0 && document.getElementById('story-log').textContent.trim()){
+    const starterText = document.getElementById('story-log').querySelector('.story-line');
+    if(starterText) storyLines.push(starterText.textContent.replace('To start',''));
+  }
+  storyLines.push(val);
+  input.value='';
+  renderStory();
+}
+function resetStory(){ storyLines=[]; renderStory(); }
+renderStory();
+
+/* ============ 8. HIGHWAY TRIVIA DUEL ============ */
+const TRIVIA = [
+  {q:"What's the fastest land animal?",opts:["Cheetah","Lion","Horse","Greyhound"],a:0},
+  {q:"How many states are in the U.S.?",opts:["48","49","50","52"],a:2},
+  {q:"What planet is known as the Red Planet?",opts:["Venus","Mars","Jupiter","Mercury"],a:1},
+  {q:"What's the largest ocean on Earth?",opts:["Atlantic","Indian","Arctic","Pacific"],a:3},
+  {q:"Which country is home to the Eiffel Tower?",opts:["Italy","France","Spain","Germany"],a:1},
+  {q:"What color do you get mixing blue and yellow?",opts:["Purple","Orange","Green","Brown"],a:2},
+  {q:"How many wheels does a standard car have?",opts:["2","4","6","8"],a:1},
+  {q:"What's the capital of Japan?",opts:["Seoul","Beijing","Tokyo","Bangkok"],a:2},
+  {q:"Which instrument has 88 keys?",opts:["Guitar","Piano","Violin","Drum"],a:1},
+  {q:"What gas do plants absorb from the air?",opts:["Oxygen","Nitrogen","Carbon Dioxide","Helium"],a:2},
+  {q:"How many minutes are in a full day?",opts:["1440","1240","1000","1600"],a:0},
+  {q:"What's the largest planet in our solar system?",opts:["Earth","Saturn","Jupiter","Neptune"],a:2},
+  {q:"What do bees make?",opts:["Silk","Honey","Milk","Wax only"],a:1},
+  {q:"Which shape has three sides?",opts:["Square","Triangle","Pentagon","Hexagon"],a:1},
+  {q:"What's the freezing point of water in F?",opts:["0","32","100","212"],a:1},
+  {q:"Which animal is known as man's best friend?",opts:["Cat","Dog","Horse","Parrot"],a:1},
+  {q:"How many continents are there?",opts:["5","6","7","8"],a:2},
+  {q:"What's the tallest mountain in the world?",opts:["K2","Denali","Everest","Kilimanjaro"],a:2},
+  {q:"What do you call a baby kangaroo?",opts:["Cub","Joey","Kit","Pup"],a:1},
+  {q:"Which fruit is known for keeping the doctor away?",opts:["Banana","Apple","Grape","Orange"],a:1},
+  {q:"What's the main ingredient in guacamole?",opts:["Tomato","Avocado","Pepper","Onion"],a:1},
+  {q:"Which sea creature has eight arms?",opts:["Squid","Jellyfish","Octopus","Starfish"],a:2},
+  {q:"What's the smallest prime number?",opts:["0","1","2","3"],a:2},
+  {q:"How many strings does a standard guitar have?",opts:["4","5","6","7"],a:2},
+  {q:"What's the largest desert in the world?",opts:["Sahara","Gobi","Antarctic","Mojave"],a:2},
+  {q:"Which country gifted the Statue of Liberty to the U.S.?",opts:["England","France","Spain","Italy"],a:1},
+  {q:"What's the hardest natural substance on Earth?",opts:["Gold","Iron","Diamond","Quartz"],a:2},
+  {q:"How many legs does a spider have?",opts:["6","8","10","12"],a:1},
+  {q:"What's the currency of Japan?",opts:["Won","Yuan","Yen","Ringgit"],a:2},
+  {q:"Which planet has the most moons?",opts:["Earth","Mars","Saturn","Mercury"],a:2},
+  {q:"What do you call a group of lions?",opts:["Pack","Pride","Herd","Flock"],a:1},
+  {q:"Which U.S. state is known as the Sunshine State?",opts:["California","Florida","Arizona","Texas"],a:1},
+  {q:"How many colors are in a rainbow?",opts:["5","6","7","8"],a:2},
+  {q:"What's the longest river in the world?",opts:["Amazon","Nile","Mississippi","Yangtze"],a:1},
+  {q:"What is H2O more commonly known as?",opts:["Salt","Oxygen","Water","Sugar"],a:2},
+  {q:"Which animal is the tallest in the world?",opts:["Elephant","Giraffe","Camel","Horse"],a:1},
+  {q:"What's the capital of Italy?",opts:["Venice","Milan","Rome","Florence"],a:2},
+  {q:"How many players are on a standard soccer team on the field?",opts:["9","10","11","12"],a:2},
+  {q:"What color is a ruby?",opts:["Blue","Green","Red","Yellow"],a:2},
+  {q:"Which sense organ is used to detect smell?",opts:["Eyes","Ears","Nose","Tongue"],a:2},
+  {q:"What's the fastest bird in the world?",opts:["Eagle","Peregrine Falcon","Ostrich","Hummingbird"],a:1},
+  {q:"How many sides does a stop sign have?",opts:["6","7","8","9"],a:2},
+  {q:"What's the main ingredient in bread?",opts:["Rice","Flour","Corn","Oats"],a:1},
+  {q:"Which continent is the Sahara Desert located on?",opts:["Asia","Africa","Australia","South America"],a:1},
+  {q:"What's the boiling point of water in Celsius?",opts:["90","100","110","120"],a:1},
+  {q:"Which gas do humans need to breathe to survive?",opts:["Carbon Dioxide","Nitrogen","Oxygen","Helium"],a:2},
+  {q:"What's the largest mammal in the world?",opts:["Elephant","Blue Whale","Giraffe","Hippopotamus"],a:1},
+  {q:"How many minutes are in two hours?",opts:["100","110","120","130"],a:2},
+  {q:"What shape is a stop sign?",opts:["Circle","Square","Octagon","Triangle"],a:2},
+];
+let triviaDeck = [];
+let triviaIndex = 0;
+let triviaScores = [0,0];
+let triviaTurn = 0;
+function startTrivia(){
+  document.getElementById('trivia-setup').classList.add('hidden');
+  document.getElementById('trivia-done').classList.add('hidden');
+  document.getElementById('trivia-play').classList.remove('hidden');
+  triviaDeck = shuffle(TRIVIA).slice(0,15);
+  triviaIndex = 0;
+  triviaScores = [0,0];
+  triviaTurn = 0;
+  updateScores();
+  showTriviaQ();
+}
+function updateScores(){
+  document.getElementById('trivia-score-1').querySelector('.pts').textContent = triviaScores[0];
+  document.getElementById('trivia-score-2').querySelector('.pts').textContent = triviaScores[1];
+  document.getElementById('trivia-score-1').classList.toggle('active', triviaTurn===0);
+  document.getElementById('trivia-score-2').classList.toggle('active', triviaTurn===1);
+}
+function showTriviaQ(){
+  const item = triviaDeck[triviaIndex];
+  document.getElementById('trivia-turn-badge').textContent = "PLAYER " + (triviaTurn+1) + "'S TURN";
+  document.getElementById('trivia-q').textContent = item.q;
+  const optsWrap = document.getElementById('trivia-opts');
+  optsWrap.innerHTML='';
+  item.opts.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className='opt-btn';
+    b.textContent = opt;
+    b.onclick = ()=>answerTrivia(i);
+    optsWrap.appendChild(b);
+  });
+  document.getElementById('trivia-next-btn').classList.add('hidden');
+}
+function answerTrivia(i){
+  const item = triviaDeck[triviaIndex];
+  const buttons = document.querySelectorAll('#trivia-opts .opt-btn');
+  buttons.forEach((b,idx)=>{
+    b.disabled = true;
+    if(idx===item.a) b.classList.add('correct');
+    else if(idx===i) b.classList.add('wrong');
+  });
+  if(i===item.a){ triviaScores[triviaTurn]++; }
+  updateScores();
+  document.getElementById('trivia-next-btn').classList.remove('hidden');
+}
+function nextTrivia(){
+  triviaIndex++;
+  triviaTurn = triviaTurn===0?1:0;
+  if(triviaIndex >= triviaDeck.length){
+    document.getElementById('trivia-play').classList.add('hidden');
+    document.getElementById('trivia-done').classList.remove('hidden');
+    let msg;
+    if(triviaScores[0]>triviaScores[1]) msg = "Player 1 Wins!";
+    else if(triviaScores[1]>triviaScores[0]) msg = "Player 2 Wins!";
+    else msg = "It's a Tie!";
+    document.getElementById('trivia-winner').textContent = msg;
+    return;
+  }
+  updateScores();
+  showTriviaQ();
+}
+
+/* ============ 9. I SPY CHECKLIST ============ */
+const ISPY = ["Cow","Motorcycle","Out-of-state Plate","Water Tower","Semi Truck","Gas Station","Rainbow","Fast Food Sign","Hay Bale","Tunnel","Bridge","Windmill","RV or Camper","Police Car","School Bus","Historical Marker","Rest Stop","Construction Cone","Tractor","Horse","Church Steeple","Billboard","Train","Bicycle","Boat on a Trailer","Hot Air Balloon","Flag","Fire Truck","Silo","Roadside Fruit Stand","Solar Panels","Person Jogging","Motel Sign","Drive-in Theater","Toll Booth","Deer"];
+let ispyState = {};
+function renderIspy(){
+  const wrap = document.getElementById('ispy-grid');
+  wrap.innerHTML='';
+  ISPY.forEach(item=>{
+    const tile = document.createElement('div');
+    tile.className = 'spot-tile' + (ispyState[item]?' found':'');
+    tile.textContent = item;
+    tile.onclick = ()=>{ ispyState[item] = !ispyState[item]; renderIspy(); };
+    wrap.appendChild(tile);
+  });
+  const found = Object.values(ispyState).filter(Boolean).length;
+  document.getElementById('ispy-progress').textContent = found + ' / ' + ISPY.length + ' spotted';
+}
+function resetIspy(){ ispyState={}; renderIspy(); }
+renderIspy();
+
+/* ============ 10. NEVER HAVE I EVER ============ */
+const NEVER = [
+  "Never have I ever gotten carsick on a road trip.",
+  "Never have I ever fallen asleep in the middle of a conversation in the car.",
+  "Never have I ever eaten fast food for breakfast, lunch, and dinner on the same trip.",
+  "Never have I ever forgotten something important at home before a trip.",
+  "Never have I ever gotten lost using GPS anyway.",
+  "Never have I ever sang the wrong lyrics to a song the whole car was singing.",
+  "Never have I ever pretended to be asleep to avoid a conversation in the car.",
+  "Never have I ever taken a picture out the car window while it was moving.",
+  "Never have I ever eaten something that fell on the car floor.",
+  "Never have I ever had to pull over because someone needed the bathroom urgently.",
+  "Never have I ever missed an exit because I was distracted.",
+  "Never have I ever brought way too much luggage for a short trip.",
+  "Never have I ever fallen asleep and drooled in the car.",
+  "Never have I ever gotten in an argument over the AC temperature.",
+  "Never have I ever eaten a gas station hot dog.",
+  "Never have I ever driven in the wrong direction for more than 10 minutes.",
+  "Never have I ever forgotten to fill up the tank and almost run out of gas.",
+  "Never have I ever taken a road trip with no real plan at all.",
+  "Never have I ever complained about someone else's music choice.",
+  "Never have I ever spilled a drink in the car.",
+  "Never have I ever used a rest stop bathroom and regretted it.",
+  "Never have I ever had a full conversation with a stranger at a gas station.",
+  "Never have I ever cried during a movie or show while traveling.",
+  "Never have I ever taken way too many snack breaks on one trip.",
+  "Never have I ever slept through an entire leg of a road trip.",
+  "Never have I ever gotten a speeding ticket.",
+  "Never have I ever changed the radio station without asking.",
+  "Never have I ever pretended to know a shortcut that made the trip longer.",
+  "Never have I ever eaten dessert before the main meal on a road trip.",
+  "Never have I ever left the house without checking the weather first.",
+  "Never have I ever taken a road trip with less than a quarter tank of gas on purpose.",
+  "Never have I ever pulled an all-nighter to drive through the night.",
+  "Never have I ever pretended to be interested in a scenic overlook just to stretch my legs.",
+  "Never have I ever let someone else pick the entire playlist without complaint.",
+  "Never have I ever snuck a pet into a no-pets motel.",
+  "Never have I ever eaten a meal entirely from a vending machine.",
+  "Never have I ever gotten way too competitive over a car game.",
+  "Never have I ever pretended not to hear a question so I wouldn't have to answer.",
+  "Never have I ever taken a wrong turn and refused to admit it.",
+  "Never have I ever fallen asleep mid-sentence in a road trip conversation.",
+];
+let neverDeck = shuffle(NEVER);
+let neverIndex = 0;
+function nextNever(){
+  if(neverIndex >= neverDeck.length){ neverDeck = shuffle(NEVER); neverIndex = 0; }
+  document.getElementById('never-statement').textContent = neverDeck[neverIndex];
+  document.getElementById('never-count').textContent = 'Statement ' + (neverIndex+1) + ' of ' + neverDeck.length;
+  neverIndex++;
+}
+nextNever();
+</script>
+</body>
+</html>
